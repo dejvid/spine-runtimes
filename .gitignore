@@ -21,6 +21,9 @@ spine-sfml/SFML
 
 spine-libgdx/bin/*
 spine-libgdx/libs/*
+spine-libgdx/.gradle/*
+spine-libgdx/build/*
+
 
 spine-cocos2dx/2/cocos2dx/
 !spine-cocos2dx/2/cocos2dx/Place cocos2dx here.txt

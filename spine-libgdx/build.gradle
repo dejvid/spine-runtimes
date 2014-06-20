@@ -1,0 +1,31 @@
+apply plugin: "java"
+
+sourceCompatibility = 1.6
+version = "1.0"
+ext.gdxVersion = "1.0.0"
+    
+repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+        mavenLocal();
+}
+
+dependencies {
+    compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+}
+
+sourceSets {
+    main {
+       java {
+            srcDir 'src'
+        }
+    }
+}
+
+jar { 
+    from sourceSets.main.java 
+    manifest { 
+        attributes 'Implementation-Title': 'Spine Libgdx Runtime', 'Implementation-Version': version, 'Build-Time': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")  
+    } 
+}
+
