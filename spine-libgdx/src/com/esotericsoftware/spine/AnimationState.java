@@ -113,7 +113,7 @@ public class AnimationState {
 				current.animation.mix(skeleton, lastTime, time, loop, events, alpha);
 			}
 
-			for (int ii = 0, nn = events.size; ii < nn; ii++) {
+			for (int ii = 0; ii < events.size; ii++) {
 				Event event = events.get(ii);
 				if (current.listener != null) current.listener.event(i, event);
 				for (int iii = 0; iii < listenerCount; iii++)
@@ -124,7 +124,7 @@ public class AnimationState {
 			if (loop ? (lastTime % endTime > time % endTime) : (lastTime < endTime && time >= endTime)) {
 				int count = (int)(time / endTime);
 				if (current.listener != null) current.listener.complete(i, count);
-				for (int ii = 0, nn = listeners.size; ii < nn; ii++)
+				for (int ii = 0; ii < listeners.size; ii++)
 					listeners.get(ii).complete(i, count);
 			}
 
