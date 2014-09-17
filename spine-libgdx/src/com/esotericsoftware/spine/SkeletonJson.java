@@ -80,7 +80,95 @@ public class SkeletonJson {
 		this.scale = scale;
 	}
 
-	public SkeletonData readSkeletonData (FileHandle file) {
+
+    public SkeletonData readSkeletonData (FileHandle file_, JsonValue root) {
+//        if (file == null) throw new IllegalArgumentException("file cannot be null.");
+
+        float scale = this.scale;
+
+        SkeletonData skeletonData = new SkeletonData();
+        skeletonData.name = file_.nameWithoutExtension();
+
+        // Bones.
+        for (JsonValue boneMap = root.getChild("bones"); boneMap != null; boneMap = boneMap.next) {
+            BoneData parent = null;
+            String parentName = boneMap.getString("parent", null);
+            if (parentName != null) {
+                parent = skeletonData.findBone(parentName);
+                if (parent == null) throw new SerializationException("Parent bone not found: " + parentName);
+            }
+            BoneData boneData = new BoneData(boneMap.getString("name"), parent);
+            boneData.length = boneMap.getFloat("length", 0) * scale;
+            boneData.x = boneMap.getFloat("x", 0) * scale;
+            boneData.y = boneMap.getFloat("y", 0) * scale;
+            boneData.rotation = boneMap.getFloat("rotation", 0);
+            boneData.scaleX = boneMap.getFloat("scaleX", 1);
+            boneData.scaleY = boneMap.getFloat("scaleY", 1);
+            boneData.inheritScale = boneMap.getBoolean("inheritScale", true);
+            boneData.inheritRotation = boneMap.getBoolean("inheritRotation", true);
+
+            String color = boneMap.getString("color", null);
+            if (color != null) boneData.getColor().set(Color.valueOf(color));
+
+            skeletonData.addBone(boneData);
+        }
+
+        // Slots.
+        for (JsonValue slotMap = root.getChild("slots"); slotMap != null; slotMap = slotMap.next) {
+            String slotName = slotMap.getString("name");
+            String boneName = slotMap.getString("bone");
+            BoneData boneData = skeletonData.findBone(boneName);
+            if (boneData == null) throw new SerializationException("Slot bone not found: " + boneName);
+            SlotData slotData = new SlotData(slotName, boneData);
+
+            String color = slotMap.getString("color", null);
+            if (color != null) slotData.getColor().set(Color.valueOf(color));
+
+            slotData.attachmentName = slotMap.getString("attachment", null);
+
+            slotData.additiveBlending = slotMap.getBoolean("additive", false);
+
+            skeletonData.addSlot(slotData);
+        }
+
+        // Skins.
+        for (JsonValue skinMap = root.getChild("skins"); skinMap != null; skinMap = skinMap.next) {
+            Skin skin = new Skin(skinMap.name);
+            for (JsonValue slotEntry = skinMap.child; slotEntry != null; slotEntry = slotEntry.next) {
+                int slotIndex = skeletonData.findSlotIndex(slotEntry.name);
+                if (slotIndex == -1) throw new SerializationException("Slot not found: " + slotEntry.name);
+                for (JsonValue entry = slotEntry.child; entry != null; entry = entry.next) {
+                    Attachment attachment = readAttachment(skin, entry.name, entry);
+                    if (attachment != null) skin.addAttachment(slotIndex, entry.name, attachment);
+                }
+            }
+            skeletonData.addSkin(skin);
+            if (skin.name.equals("default")) skeletonData.defaultSkin = skin;
+        }
+
+        // Events.
+        for (JsonValue eventMap = root.getChild("events"); eventMap != null; eventMap = eventMap.next) {
+            EventData eventData = new EventData(eventMap.name);
+            eventData.intValue = eventMap.getInt("int", 0);
+            eventData.floatValue = eventMap.getFloat("float", 0f);
+            eventData.stringValue = eventMap.getString("string", null);
+            skeletonData.addEvent(eventData);
+        }
+
+        // Animations.
+        for (JsonValue animationMap = root.getChild("animations"); animationMap != null; animationMap = animationMap.next)
+            readAnimation(animationMap.name, animationMap, skeletonData);
+
+        skeletonData.bones.shrink();
+        skeletonData.slots.shrink();
+        skeletonData.skins.shrink();
+        skeletonData.animations.shrink();
+        return skeletonData;
+    }
+
+
+
+    public SkeletonData readSkeletonData (FileHandle file) {
 		if (file == null) throw new IllegalArgumentException("file cannot be null.");
 
 		float scale = this.scale;
