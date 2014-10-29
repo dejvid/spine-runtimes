@@ -118,7 +118,7 @@ public class SkeletonRenderer {
 		}
 	}
 
-    public void draw (PolygonSpriteBatch batch, Skeleton skeleton, boolean updateWorldVertices) {
+    public void draw (PolygonSpriteBatch batch, Skeleton skeleton, boolean updateWorldVertices_) {
         boolean premultipliedAlpha = this.premultipliedAlpha;
         int srcFunc = premultipliedAlpha ? GL20.GL_ONE : GL20.GL_SRC_ALPHA;
         batch.setBlendFunction(srcFunc, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -134,15 +134,15 @@ public class SkeletonRenderer {
             Texture texture = null;
             if (attachment instanceof RegionAttachment) {
                 RegionAttachment region = (RegionAttachment)attachment;
-                if(updateWorldVertices)
-                    region.updateWorldVertices(slot, premultipliedAlpha);
+//                if(updateWorldVertices)
+                region.updateWorldVertices(slot, premultipliedAlpha);
                 vertices = region.getWorldVertices();
                 triangles = quadTriangles;
                 texture = region.getRegion().getTexture();
 
             } else if (attachment instanceof MeshAttachment) {
                 MeshAttachment mesh = (MeshAttachment)attachment;
-                if(updateWorldVertices)
+                if(updateWorldVertices_)
                     mesh.updateWorldVertices(slot, true);
                 vertices = mesh.getWorldVertices();
                 triangles = mesh.getTriangles();
@@ -150,7 +150,7 @@ public class SkeletonRenderer {
 
             } else if (attachment instanceof SkinnedMeshAttachment) {
                 SkinnedMeshAttachment mesh = (SkinnedMeshAttachment)attachment;
-                if(updateWorldVertices)
+                if(updateWorldVertices_)
                     mesh.updateWorldVertices(slot, true);
                 vertices = mesh.getWorldVertices();
                 triangles = mesh.getTriangles();
